@@ -1,0 +1,24 @@
+{
+    "name": "ekvedaras/space-sim",
+    "type": "project",
+    "require": {
+        "php": "^8.5"
+    },
+    "require-dev": {
+        "webmozart/assert": "^2.4",
+        "phpstan/phpstan": "^2.2",
+        "phpstan/phpstan-webmozart-assert": "^2.0"
+    },
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Ekvedaras\\SpaceSim\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ernestas Kvedaras",
+            "email": "kvedarasernestas@gmail.com"
+        }
+    ]
+}

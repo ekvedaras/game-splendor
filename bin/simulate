@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Ekvedaras\SpaceSim\SystemNode;
+use Ekvedaras\SpaceSim\World;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$world = new World(
+  500,
+  150,
+  new SystemNode('Colonies', 50, 1, 0.2),
+  new SystemNode('Research', 40, 3, 0.4),
+  new SystemNode('Expansion', 80, 4, 0.8),
+  new SystemNode('Optimization', 10, 2, 0.3),
+);
+
+for ($tick = 1; $tick <= 20; $tick++) {
+  echo "Tick {$tick}\n";
+
+  $production = $world->energyProduction;
+
+  $world->reduceEfficiency(by: 0.01);
+
+  if ($tick % 3 === 0) {
+    echo "☀️ flare \n";
+    $world->reduceEfficiency(by: 0.2);
+    $world->randomSystem()->degradeState();
+  }
+
+  echo "Energy: ⚡{$world->availableEnergy} + ({$world->energyProduction})\n";
+  echo "Complexity: 🔧{$world->complexity}\n";
+
+  $world->tick();
+
+  echo $world;
+
+  echo "\n";
+  echo "\n";
+
+  $world->energyProduction = $production;
+}
