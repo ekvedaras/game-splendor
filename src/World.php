@@ -4,96 +4,85 @@ declare(strict_types=1);
 
 namespace Ekvedaras\SpaceSim;
 
+use Ekvedaras\SpaceSim\Actions\Action;
+use Ekvedaras\SpaceSim\Actions\ChangeDoctrine;
+use Ekvedaras\SpaceSim\Actions\QuitGame;
 use Ekvedaras\SpaceSim\Doctrines\Doctrine;
+
+use Ekvedaras\SpaceSim\Doctrines\OrbitalInfrastructure;
+
+use Ekvedaras\SpaceSim\Doctrines\PlanetaryIndustry;
 
 use function Laravel\Prompts\table;
 
 final class World
 {
-    public ?self $previous;
+    /** @var array<non-empty-string, Planet> */
+    private(set) array $planets = [];
+
+    public int $energyProduction {
+        get => array_sum(array_map(fn (Planet $planet) => $planet->energyProduction, $this->planets));
+    }
+
+    public int $energyConsumption {
+        get => (int)array_sum(array_map(fn (Planet $planet) => $planet->energyConsumption, $this->planets));
+    }
+
+    public bool $allowChangingDoctrine = false;
 
     public function __construct(
         public Doctrine $doctrine,
-        public int $energy,
-        public int $population,
-        public int $energyProduction,
-        public int $energyConsumption,
-        public int $detectability,
-        public int $complexity,
+        private(set) int $energy,
     ) {
+        $this->planets[] = new Planet(
+            name: 'Earth',
+            world: $this,
+            population: 2,
+        );
     }
 
     public function tick(): void
     {
-        $this->previous = clone $this;
-
         $this->doctrine->tick($this);
-
-        $this->population += 1;
-        $this->energy += $this->energyProduction - $this->energyConsumption;
+        $this->generateEnergy($this->energyProduction - $this->energyConsumption);
     }
 
-    private function diff(): array
+    public function generateEnergy(int $amount): void
     {
-        if (!isset($this->previous)) {
-            return [
-                'energy'            => '',
-                'population'        => '',
-                'energyProduction'  => '',
-                'energyConsumption' => '',
-                'detectability'     => '',
-                'complexity'        => '',
-            ];
-        }
+        $this->energy += $amount;
+    }
 
-        return [
-            'energy'            => ' ' . match (true) {
-                    $this->energy < $this->previous->energy => '-',
-                    $this->energy > $this->previous->energy => '+',
-                    default => '',
-                } . round(abs($this->energy - $this->previous->energy) * 100 / $this->previous->energy) . '%',
-            'population'        => ' ' . match (true) {
-                    $this->population < $this->previous->population => '-',
-                    $this->population > $this->previous->population => '+',
-                    default => '',
-                } . round(abs($this->population - $this->previous->population) * 100 / $this->previous->population) . '%',
-            'energyProduction'  => ' ' . match (true) {
-                    $this->energyProduction < $this->previous->energyProduction => '-',
-                    $this->energyProduction > $this->previous->energyProduction => '+',
-                    default => '',
-                } . round(abs($this->energyProduction - $this->previous->energyProduction) * 100 / $this->previous->energyProduction) . '%',
-            'energyConsumption' => ' ' . match (true) {
-                    $this->energyConsumption < $this->previous->energyConsumption => '-',
-                    $this->energyConsumption > $this->previous->energyConsumption => '+',
-                    default => '',
-                } . round(abs($this->energyConsumption - $this->previous->energyConsumption) * 100 / $this->previous->energyConsumption) . '%',
-            'detectability'     => ' ' . match (true) {
-                    $this->detectability < $this->previous->detectability => '-',
-                    $this->detectability > $this->previous->detectability => '+',
-                    default => '',
-                } . round(abs($this->detectability - $this->previous->detectability) * 100 / $this->previous->detectability) . '%',
-            'complexity'        => ' ' . match (true) {
-                    $this->complexity < $this->previous->complexity => '-',
-                    $this->complexity > $this->previous->complexity => '+',
-                    default => '',
-                } . round(abs($this->complexity - $this->previous->complexity) * 100 / $this->previous->complexity) . '%',
+    public function consumeEnergy(int $amount): void
+    {
+        $this->energy -= $amount;
+    }
+
+    /** @return list<Action> */
+    public function availableActions(): array
+    {
+        $actions = [
+            ...($this->allowChangingDoctrine ? [
+                new ChangeDoctrine(new OrbitalInfrastructure()),
+                new ChangeDoctrine(new PlanetaryIndustry()),
+            ] : []),
+            ...$this->doctrine->availableActions($this),
+            new QuitGame(),
         ];
+
+        $keys = array_map(strval(...), $actions);
+
+        return array_combine($keys, $actions);
     }
 
     public function print(): void
     {
-        $diff = $this->diff();
-
-        table(['Doctrine', 'Energy', 'Population', 'Energy production', 'Energy concumption', 'detectability', 'complexity'],
+        table(['Doctrine', 'Energy', 'Population', 'Energy production', 'Energy concumption'],
               [
                   [
                       'doctrine'          => $this->doctrine::class,
-                      'energy'            => $this->energy . $diff['energy'],
-                      'population'        => $this->population . $diff['population'],
-                      'energyProduction'  => $this->energyProduction . $diff['energyProduction'],
-                      'energyConsumption' => $this->energyConsumption . $diff['energyConsumption'],
-                      'detectability'     => $this->detectability . $diff['detectability'],
-                      'complexity'        => $this->complexity . $diff['complexity'],
+                      'energy'            => $this->energy,
+                      'energyProduction'  => $this->energyProduction,
+                      'energyConsumption' => $this->energyConsumption,
                   ],
               ]);
     }

@@ -3,10 +3,6 @@
 
 declare(strict_types=1);
 
-use Ekvedaras\SpaceSim\Doctrines\EnergyDoctrine;
-use Ekvedaras\SpaceSim\Doctrines\ExplorationDoctrine;
-use Ekvedaras\SpaceSim\Doctrines\IndustryDoctrine;
-use Ekvedaras\SpaceSim\Doctrines\SocietyDoctrine;
 use Ekvedaras\SpaceSim\World;
 use NunoMaduro\Collision\Provider as CollisonProvider;
 
@@ -18,38 +14,23 @@ require __DIR__ . '/../vendor/autoload.php';
 (new CollisonProvider)->register();
 
 $world = new World(
-  doctrine: new EnergyDoctrine(),
-  energy: 1000,
-  population: 100,
-  energyProduction: 100,
-  energyConsumption: 80,
-  detectability: 1,
-  complexity: 1,
+  doctrine: new \Ekvedaras\SpaceSim\Doctrines\PlanetaryIndustry(),
+  energy: 50,
 );
 
 $world->print();
 
 for ($tick = 1; $tick <= 100; $tick++) {
   echo "Tick {$tick}\n";
-
-  if ($tick % 5 === 0) {
-    $newDoctrine = select('Select doctrine', [
-      EnergyDoctrine::class => 'Energy',
-      ExplorationDoctrine::class => 'Exploration',
-      IndustryDoctrine::class => 'Industry',
-      SocietyDoctrine::class => 'Society',
-    ], default: $world->doctrine::class);
-
-    $world->doctrine = new $newDoctrine();
-  }
-
   $world->tick();
-
   echo $world->print();
 
-  if (confirm('continue?') === false) {
-    break;
+  if ($tick % 5 === 0) {
+    $world->allowChangingDoctrine = true;
   }
 
+  $actions = $world->availableActions();
+  $choice = select('What to do next?', $actions);
 
+  $actions[$choice]->execute($world);
 }
