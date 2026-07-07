@@ -2,12 +2,14 @@
     "name": "ekvedaras/space-sim",
     "type": "project",
     "require": {
-        "php": "^8.5"
+        "php": "^8.5",
+        "laravel/prompts": "^0.3.21"
     },
     "require-dev": {
         "webmozart/assert": "^2.4",
         "phpstan/phpstan": "^2.2",
-        "phpstan/phpstan-webmozart-assert": "^2.0"
+        "phpstan/phpstan-webmozart-assert": "^2.0",
+        "nunomaduro/collision": "^8.9"
     },
     "license": "proprietary",
     "autoload": {

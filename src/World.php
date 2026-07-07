@@ -4,80 +4,97 @@ declare(strict_types=1);
 
 namespace Ekvedaras\SpaceSim;
 
-use Webmozart\Assert\Assert;
+use Ekvedaras\SpaceSim\Doctrines\Doctrine;
 
-final class World implements \Stringable
+use function Laravel\Prompts\table;
+
+final class World
 {
-    /** @var non-empty-list<SystemNode> */
-    private array $systems = [];
-
-    private(set) float $cumulativeOutput = 0.0;
-    private(set) float $lastOutput = 0.0;
-    public float $complexity {
-        get => array_sum(array_map(fn (SystemNode $system) => $system->complexity, $this->systems));
-    }
+    public ?self $previous;
 
     public function __construct(
-        private(set) int $availableEnergy,
+        public Doctrine $doctrine,
+        public int $energy,
+        public int $population,
         public int $energyProduction,
-        SystemNode ...$systems,
-    )
-    {
-        Assert::notEmpty($systems, 'World needs at least one system in it');
-
-        usort($systems, fn(SystemNode $a, SystemNode $b) => $a->priority <=> $b->priority);
-        $this->systems = array_values($systems);
+        public int $energyConsumption,
+        public int $detectability,
+        public int $complexity,
+    ) {
     }
 
     public function tick(): void
     {
-        $availableEnergy = $this->availableEnergy + $this->energyProduction;
-        $output = 0;
+        $this->previous = clone $this;
 
-        foreach ($this->systems as $system) {
-            if ($availableEnergy <= 0) {
-                $system->efficiency = 0.2; // degraded node
-                $output += $system->output;
-                continue;
-            }
+        $this->doctrine->tick($this);
 
-            if ($availableEnergy >= $system->energyDemand) {
-                $availableEnergy -= $system->energyDemand;
-//                $system->efficiency = 1.0;
-                $output += $system->output;
+        $this->population += 1;
+        $this->energy += $this->energyProduction - $this->energyConsumption;
+    }
 
-                continue;
-            }
-
-            // partial supply = slowdown
-            $ratio = $availableEnergy / $system->energyDemand;
-            $system->efficiency = max(0.2, $ratio);
-            $output += $system->output;
-            $availableEnergy = 0;
+    private function diff(): array
+    {
+        if (!isset($this->previous)) {
+            return [
+                'energy'            => '',
+                'population'        => '',
+                'energyProduction'  => '',
+                'energyConsumption' => '',
+                'detectability'     => '',
+                'complexity'        => '',
+            ];
         }
 
-        $this->availableEnergy = $availableEnergy;
-        $this->lastOutput = $output * (count($this->systems) - $this->complexity);
-        $this->cumulativeOutput += $this->lastOutput;
+        return [
+            'energy'            => ' ' . match (true) {
+                    $this->energy < $this->previous->energy => '-',
+                    $this->energy > $this->previous->energy => '+',
+                    default => '',
+                } . round(abs($this->energy - $this->previous->energy) * 100 / $this->previous->energy) . '%',
+            'population'        => ' ' . match (true) {
+                    $this->population < $this->previous->population => '-',
+                    $this->population > $this->previous->population => '+',
+                    default => '',
+                } . round(abs($this->population - $this->previous->population) * 100 / $this->previous->population) . '%',
+            'energyProduction'  => ' ' . match (true) {
+                    $this->energyProduction < $this->previous->energyProduction => '-',
+                    $this->energyProduction > $this->previous->energyProduction => '+',
+                    default => '',
+                } . round(abs($this->energyProduction - $this->previous->energyProduction) * 100 / $this->previous->energyProduction) . '%',
+            'energyConsumption' => ' ' . match (true) {
+                    $this->energyConsumption < $this->previous->energyConsumption => '-',
+                    $this->energyConsumption > $this->previous->energyConsumption => '+',
+                    default => '',
+                } . round(abs($this->energyConsumption - $this->previous->energyConsumption) * 100 / $this->previous->energyConsumption) . '%',
+            'detectability'     => ' ' . match (true) {
+                    $this->detectability < $this->previous->detectability => '-',
+                    $this->detectability > $this->previous->detectability => '+',
+                    default => '',
+                } . round(abs($this->detectability - $this->previous->detectability) * 100 / $this->previous->detectability) . '%',
+            'complexity'        => ' ' . match (true) {
+                    $this->complexity < $this->previous->complexity => '-',
+                    $this->complexity > $this->previous->complexity => '+',
+                    default => '',
+                } . round(abs($this->complexity - $this->previous->complexity) * 100 / $this->previous->complexity) . '%',
+        ];
     }
 
-    public function reduceEfficiency(float $by): void
+    public function print(): void
     {
-        foreach ($this->systems as $system) {
-            $system->efficiency = max(0.2, $system->efficiency - $by);
-        }
-    }
+        $diff = $this->diff();
 
-    public function randomSystem(): SystemNode
-    {
-        return $this->systems[array_rand($this->systems)];
-    }
-
-    public function __toString(): string
-    {
-        return implode("\n", $this->systems)
-               . "\nAvailable energy: ⚡{$this->availableEnergy}"
-               . sprintf("\nOutput -> %0.3f (%0.3f) / 🔧%0.3f \n ", $this->cumulativeOutput, $this->lastOutput, $this->complexity)
-            ;
+        table(['Doctrine', 'Energy', 'Population', 'Energy production', 'Energy concumption', 'detectability', 'complexity'],
+              [
+                  [
+                      'doctrine'          => $this->doctrine::class,
+                      'energy'            => $this->energy . $diff['energy'],
+                      'population'        => $this->population . $diff['population'],
+                      'energyProduction'  => $this->energyProduction . $diff['energyProduction'],
+                      'energyConsumption' => $this->energyConsumption . $diff['energyConsumption'],
+                      'detectability'     => $this->detectability . $diff['detectability'],
+                      'complexity'        => $this->complexity . $diff['complexity'],
+                  ],
+              ]);
     }
 }

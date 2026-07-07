@@ -3,42 +3,53 @@
 
 declare(strict_types=1);
 
-use Ekvedaras\SpaceSim\SystemNode;
+use Ekvedaras\SpaceSim\Doctrines\EnergyDoctrine;
+use Ekvedaras\SpaceSim\Doctrines\ExplorationDoctrine;
+use Ekvedaras\SpaceSim\Doctrines\IndustryDoctrine;
+use Ekvedaras\SpaceSim\Doctrines\SocietyDoctrine;
 use Ekvedaras\SpaceSim\World;
+use NunoMaduro\Collision\Provider as CollisonProvider;
+
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\select;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+(new CollisonProvider)->register();
+
 $world = new World(
-  500,
-  150,
-  new SystemNode('Colonies', 50, 1, 0.2),
-  new SystemNode('Research', 40, 3, 0.4),
-  new SystemNode('Expansion', 80, 4, 0.8),
-  new SystemNode('Optimization', 10, 2, 0.3),
+  doctrine: new EnergyDoctrine(),
+  energy: 1000,
+  population: 100,
+  energyProduction: 100,
+  energyConsumption: 80,
+  detectability: 1,
+  complexity: 1,
 );
 
-for ($tick = 1; $tick <= 20; $tick++) {
+$world->print();
+
+for ($tick = 1; $tick <= 100; $tick++) {
   echo "Tick {$tick}\n";
 
-  $production = $world->energyProduction;
+  if ($tick % 5 === 0) {
+    $newDoctrine = select('Select doctrine', [
+      EnergyDoctrine::class => 'Energy',
+      ExplorationDoctrine::class => 'Exploration',
+      IndustryDoctrine::class => 'Industry',
+      SocietyDoctrine::class => 'Society',
+    ], default: $world->doctrine::class);
 
-  $world->reduceEfficiency(by: 0.01);
-
-  if ($tick % 3 === 0) {
-    echo "☀️ flare \n";
-    $world->reduceEfficiency(by: 0.2);
-    $world->randomSystem()->degradeState();
+    $world->doctrine = new $newDoctrine();
   }
-
-  echo "Energy: ⚡{$world->availableEnergy} + ({$world->energyProduction})\n";
-  echo "Complexity: 🔧{$world->complexity}\n";
 
   $world->tick();
 
-  echo $world;
+  echo $world->print();
 
-  echo "\n";
-  echo "\n";
+  if (confirm('continue?') === false) {
+    break;
+  }
 
-  $world->energyProduction = $production;
+
 }
