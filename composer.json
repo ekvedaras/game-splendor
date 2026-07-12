@@ -9,7 +9,8 @@
         "webmozart/assert": "^2.4",
         "phpstan/phpstan": "^2.2",
         "phpstan/phpstan-webmozart-assert": "^2.0",
-        "nunomaduro/collision": "^8.9"
+        "nunomaduro/collision": "^8.9",
+        "symfony/var-dumper": "^8.1"
     },
     "license": "proprietary",
     "autoload": {

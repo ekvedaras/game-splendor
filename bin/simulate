@@ -3,7 +3,15 @@
 
 declare(strict_types=1);
 
-use Ekvedaras\SpaceSim\World;
+use Ekvedaras\SpaceSim\Card;
+use Ekvedaras\SpaceSim\Cost\MultipleResources;
+use Ekvedaras\SpaceSim\Cost\Resources;
+use Ekvedaras\SpaceSim\Cost\SingleResource;
+use Ekvedaras\SpaceSim\Deck\ClosedDeck;
+use Ekvedaras\SpaceSim\Game;
+use Ekvedaras\SpaceSim\Level;
+use Ekvedaras\SpaceSim\Player;
+use Ekvedaras\SpaceSim\Resource;
 use NunoMaduro\Collision\Provider as CollisonProvider;
 
 use function Laravel\Prompts\confirm;
@@ -13,24 +21,167 @@ require __DIR__ . '/../vendor/autoload.php';
 
 (new CollisonProvider)->register();
 
-$world = new World(
-  doctrine: new \Ekvedaras\SpaceSim\Doctrines\PlanetaryIndustry(),
-  energy: 50,
+$game = new Game(
+    players: [
+        new Player('Player 1'),
+        new Player('Player 2'),
+    ],
+    firstLevelDeck: new ClosedDeck(
+        level: Level::First,
+        cards: [
+            new Card(
+                level: Level::First,
+                resource: Resource::White,
+                cost: new SingleResource(of: Resource::Green),
+                points: 0,
+            ),
+            new Card(
+                level: Level::First,
+                resource: Resource::Green,
+                cost: new MultipleResources(
+                    new Resources(of: Resource::Green, amount: 2),
+                    new SingleResource(of: Resource::Red),
+                ),
+                points: 0,
+            ),
+            new Card(
+                level: Level::First,
+                resource: Resource::Black,
+                cost: new MultipleResources(
+                    new SingleResource(of: Resource::Red),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                ),
+                points: 0,
+            ),
+            new Card(
+                level: Level::First,
+                resource: Resource::Blue,
+                cost: new MultipleResources(
+                    new SingleResource(of: Resource::Red),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                ),
+                points: 0,
+            ),
+            new Card(
+                level: Level::First,
+                resource: Resource::White,
+                cost: new MultipleResources(
+                    new SingleResource(of: Resource::Red),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                ),
+                points: 0,
+            ),
+        ],
+    ),
+    secondLevelDeck: new ClosedDeck(
+        level: Level::Second,
+        cards: [
+            new Card(
+                level: Level::Second,
+                resource: Resource::White,
+                cost: new Resources(of: Resource::Green, amount: 3),
+                points: 1,
+            ),
+            new Card(
+                level: Level::Second,
+                resource: Resource::Green,
+                cost: new MultipleResources(
+                    new Resources(of: Resource::Green, amount: 4),
+                    new SingleResource(of: Resource::Red),
+                ),
+                points: 2,
+            ),
+            new Card(
+                level: Level::Second,
+                resource: Resource::Black,
+                cost: new MultipleResources(
+                    new SingleResource(of: Resource::Red),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                    new SingleResource(of: Resource::Blue),
+                ),
+                points: 3,
+            ),
+            new Card(
+                level: Level::Second,
+                resource: Resource::Green,
+                cost: new MultipleResources(
+                    new SingleResource(of: Resource::Red),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                    new SingleResource(of: Resource::Blue),
+                ),
+                points: 3,
+            ),
+            new Card(
+                level: Level::Second,
+                resource: Resource::White,
+                cost: new MultipleResources(
+                    new SingleResource(of: Resource::Red),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                    new SingleResource(of: Resource::Blue),
+                ),
+                points: 3,
+            ),
+        ],
+    ),
+    thirdLevelDeck: new ClosedDeck(
+        level: Level::Third,
+        cards: [
+            new Card(
+                level: Level::Third,
+                resource: Resource::White,
+                cost: new Resources(of: Resource::Green, amount: 7),
+                points: 4,
+            ),
+            new Card(
+                level: Level::Third,
+                resource: Resource::Green,
+                cost: new MultipleResources(
+                    new Resources(of: Resource::Green, amount: 4),
+                    new SingleResource(of: Resource::Red),
+                ),
+                points: 3,
+            ),
+            new Card(
+                level: Level::Third,
+                resource: Resource::Black,
+                cost: new MultipleResources(
+                    new Resources(of: Resource::Red, amount: 3),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                    new SingleResource(of: Resource::Blue),
+                ),
+                points: 5,
+            ),
+            new Card(
+                level: Level::Third,
+                resource: Resource::Green,
+                cost: new MultipleResources(
+                    new Resources(of: Resource::Red, amount: 3),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                    new SingleResource(of: Resource::Blue),
+                ),
+                points: 5,
+            ),
+            new Card(
+                level: Level::Third,
+                resource: Resource::White,
+                cost: new MultipleResources(
+                    new Resources(of: Resource::Red, amount: 3),
+                    new SingleResource(of: Resource::Green),
+                    new SingleResource(of: Resource::White),
+                    new SingleResource(of: Resource::Blue),
+                ),
+                points: 5,
+            ),
+        ],
+    ),
 );
 
-$world->print();
-
-for ($tick = 1; $tick <= 100; $tick++) {
-  echo "Tick {$tick}\n";
-  $world->tick();
-  echo $world->print();
-
-  if ($tick % 5 === 0) {
-    $world->allowChangingDoctrine = true;
-  }
-
-  $actions = $world->availableActions();
-  $choice = select('What to do next?', $actions);
-
-  $actions[$choice]->execute($world);
-}
+dd($game);
