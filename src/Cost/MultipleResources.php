@@ -8,10 +8,10 @@ use SplObjectStorage;
 
 final readonly class MultipleResources implements Cost
 {
-    /** @var SplObjectStorage<Resource, ResourceCost> */
+    /** @var SplObjectStorage<Resource, Resources> */
     public SplObjectStorage $resources;
 
-    public function __construct(ResourceCost ...$cost)
+    public function __construct(Resources ...$cost)
     {
         $resources = new SplObjectStorage();
         foreach ($cost as $resourceCost) {

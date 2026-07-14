@@ -14,7 +14,7 @@ final readonly class Card
         public Level $level,
         public Resource $resource,
         public Cost $cost,
-        /** @var int<0, 5> */
+        /** @var int<0, 7> */
         public int $points,
     ) {
     }
