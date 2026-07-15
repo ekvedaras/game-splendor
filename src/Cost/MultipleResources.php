@@ -20,4 +20,14 @@ final readonly class MultipleResources implements Cost
 
         $this->resources = $resources;
     }
+
+    public function toCliString(): string
+    {
+        $strings = [];
+        foreach ($this->resources as $resource) {
+            $strings[] = $resource->toCliString();
+        }
+
+        return implode(' ', $strings);
+    }
 }

@@ -18,4 +18,9 @@ final readonly class Card
         public int $points,
     ) {
     }
+
+    public function toCliString(): string
+    {
+        return "{$this->resource->toCliColor()}{$this->points}\e[0m \e[0;30m·\e[0m {$this->cost->toCliString()}";
+    }
 }

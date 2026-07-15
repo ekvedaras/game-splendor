@@ -16,6 +16,8 @@ use Webmozart\Assert\Assert;
  */
 final class ClosedDeck
 {
+    public int $remainingCards { get => count($this->cards); }
+
     public function __construct(
         /** @var T */
         public readonly Level $level,
@@ -55,6 +57,13 @@ final class ClosedDeck
     public function revealCard(): Card|DeckIsEmpty
     {
         return array_shift($this->cards) ?? new DeckIsEmpty();
+    }
+
+    public function toCliString(): string
+    {
+        return (
+        $this->remainingCards === 0 ? "\e[0;30m" : ''
+        )."{$this->level->toCliString()} {$this->remainingCards}\e[0;30m";
     }
 
     /** @return Card<T> */

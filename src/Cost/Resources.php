@@ -16,4 +16,9 @@ final readonly class Resources implements Cost
     ) {
         Assert::range($amount, 1, 7);
     }
+
+    public function toCliString(): string
+    {
+        return str_repeat($this->of->toCliString(), $this->amount);
+    }
 }

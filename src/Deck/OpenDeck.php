@@ -48,4 +48,15 @@ final class OpenDeck implements Deck
 
         return $card;
     }
+
+    public function toCliString(): string
+    {
+        return implode(' ', $this->toCardCliStrings());
+    }
+
+    /** @return list<string> */
+    public function toCardCliStrings(): array
+    {
+        return array_map(fn (Card $card): string => $card->toCliString(), $this->cards);
+    }
 }

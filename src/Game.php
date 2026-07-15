@@ -8,31 +8,42 @@ use Ekvedaras\SpaceSim\Deck\ClosedDeck;
 use Ekvedaras\SpaceSim\Deck\OpenDeck;
 use Webmozart\Assert\Assert;
 
-final class Game
+use function Laravel\Prompts\table;
+
+final readonly class Game
 {
     /** @var OpenDeck<Level::First> */
-    private(set) readonly OpenDeck $firstLevelOpenCards;
+    private(set) OpenDeck $firstLevelOpenCards;
 
     /** @var OpenDeck<Level::Second> */
-    private(set) readonly OpenDeck $secondLevelOpenCards;
+    private(set) OpenDeck $secondLevelOpenCards;
 
     /** @var OpenDeck<Level::Third> */
-    private(set) readonly OpenDeck $thirdLevelOpenCards;
+    private(set) OpenDeck $thirdLevelOpenCards;
 
     public function __construct(
         /** @var list<Player> */
-        private(set) readonly array $players,
+        private(set) array $players,
         /** @var ClosedDeck<Level::First> */
-        private(set) readonly ClosedDeck $firstLevelDeck,
+        private(set) ClosedDeck $firstLevelDeck,
         /** @var ClosedDeck<Level::Second> */
-        private(set) readonly ClosedDeck $secondLevelDeck,
+        private(set) ClosedDeck $secondLevelDeck,
         /** @var ClosedDeck<Level::Third> */
-        private(set) readonly ClosedDeck $thirdLevelDeck,
+        private(set) ClosedDeck $thirdLevelDeck,
     )
     {
         Assert::countBetween($this->players, 1, 4);
         $this->firstLevelOpenCards = $this->firstLevelDeck->prepareOpenDeck();
         $this->secondLevelOpenCards = $this->secondLevelDeck->prepareOpenDeck();
         $this->thirdLevelOpenCards = $this->thirdLevelDeck->prepareOpenDeck();
+    }
+
+    public function print(): void
+    {
+        table([
+            [$this->thirdLevelDeck->toCliString(), ...$this->thirdLevelOpenCards->toCardCliStrings()],
+            [$this->secondLevelDeck->toCliString(), ...$this->secondLevelOpenCards->toCardCliStrings()],
+            [$this->firstLevelDeck->toCliString(), ...$this->firstLevelOpenCards->toCardCliStrings()],
+              ]);
     }
 }

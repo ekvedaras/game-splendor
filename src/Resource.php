@@ -18,6 +18,23 @@ enum Resource
     case Green;        // green
     case Yellow;       // yellow
 
+    public function toCliString(): string
+    {
+        return $this->toCliColor() . "⏺\e[0m";
+    }
+
+    public function toCliColor(): string
+    {
+        return match ($this) {
+            self::Black => "\e[0;30m",
+            self::White => "\e[0;37m",
+            self::Red => "\e[0;31m",
+            self::Green => "\e[0;32m",
+            self::Blue => "\e[0;34m",
+            self::Yellow => "\e[0;33m",
+        };
+    }
+
     public function one(): Resources
     {
         return $this->times(1);
