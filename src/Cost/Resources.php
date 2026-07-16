@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ekvedaras\SpaceSim\Cost;
 
-use Ekvedaras\SpaceSim\Resource;
+use Ekvedaras\SpaceSim\Resources\Resource;
 use Webmozart\Assert\Assert;
 
 final readonly class Resources implements Cost

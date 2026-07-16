@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Ekvedaras\SpaceSim\Deck;
 
 use Ekvedaras\SpaceSim\Card;
-use Ekvedaras\SpaceSim\Cost\MultipleResources;
-use Ekvedaras\SpaceSim\Cost\Resources;
 use Ekvedaras\SpaceSim\Level;
-use Ekvedaras\SpaceSim\Resource;
+use Ekvedaras\SpaceSim\Resources\Resource;
 use Webmozart\Assert\Assert;
 
 /**
- * @template T of value-of<Level>
+ * @template T of Level
  */
 final class ClosedDeck
 {

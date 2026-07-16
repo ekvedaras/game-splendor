@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ekvedaras\SpaceSim;
+namespace Ekvedaras\SpaceSim\Resources;
 
 use Ekvedaras\SpaceSim\Cost\Cost;
 use Ekvedaras\SpaceSim\Cost\MultipleResources;

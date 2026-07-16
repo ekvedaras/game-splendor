@@ -7,7 +7,7 @@ namespace Ekvedaras\SpaceSim\Royals;
 use Ekvedaras\SpaceSim\Cost\Cost;
 use Ekvedaras\SpaceSim\Cost\MultipleResources;
 use Ekvedaras\SpaceSim\Cost\Resources;
-use Ekvedaras\SpaceSim\Resource;
+use Ekvedaras\SpaceSim\Resources\Resource;
 
 final readonly class WhiteAndGreen implements Bonus
 {

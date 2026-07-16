@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Ekvedaras\SpaceSim;
 
 use Ekvedaras\SpaceSim\Cost\Cost;
+use Ekvedaras\SpaceSim\Resources\Resource;
+use Ekvedaras\SpaceSim\Resources\StacksOfResources;
 
-/** @template T of value-of<Level> */
+/** @template T of Level */
 final readonly class Card
 {
     public function __construct(
@@ -17,6 +19,11 @@ final readonly class Card
         /** @var int<0, 7> */
         public int $points,
     ) {
+    }
+
+    public function canBeBought(StacksOfResources $with): bool
+    {
+        return $with->hasEnough($this->cost);
     }
 
     public function toCliString(): string

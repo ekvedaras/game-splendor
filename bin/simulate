@@ -3,17 +3,10 @@
 
 declare(strict_types=1);
 
-use Ekvedaras\SpaceSim\Card;
-use Ekvedaras\SpaceSim\Cost\MultipleResources;
 use Ekvedaras\SpaceSim\Deck\ClosedDeck;
 use Ekvedaras\SpaceSim\Game;
-use Ekvedaras\SpaceSim\Level;
 use Ekvedaras\SpaceSim\Player;
-use Ekvedaras\SpaceSim\Resource;
 use NunoMaduro\Collision\Provider as CollisonProvider;
-
-use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\select;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -21,12 +14,30 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $game = new Game(
     players: [
-        new Player('Player 1'),
-        new Player('Player 2'),
+        $player1 = new Player('Player 1'),
+        $player2 = new Player('Player 2'),
     ],
     firstLevelDeck: ClosedDeck::forFirstLevel()->shuffle(),
     secondLevelDeck: ClosedDeck::forSecondLevel()->shuffle(),
     thirdLevelDeck: ClosedDeck::forThirdLevel()->shuffle(),
 );
+
+$game->print();
+echo "\n-----------------------------------------------\n";
+
+$player1
+    ->takeOneResource(from: $game->resourcesOnTheTable->redStack)
+    ->takeOneResource(from: $game->resourcesOnTheTable->greenStack)
+    ->takeOneResource(from: $game->resourcesOnTheTable->blueStack);
+
+$game->print();
+echo "\n-----------------------------------------------\n";
+
+$player2->takeTwoResources(from: $game->resourcesOnTheTable->blackStack);
+
+$game->print();
+echo "\n-----------------------------------------------\n";
+
+$player1->takeCard(1, from: $game->firstLevelOpenCards);
 
 $game->print();

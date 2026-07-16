@@ -8,11 +8,10 @@ use Ekvedaras\SpaceSim\Card;
 use Ekvedaras\SpaceSim\Level;
 use Webmozart\Assert\Assert;
 
-/**
- * @template T of value-of<Level>
- */
+/** @template T of Level */
 final class OpenDeck implements Deck
 {
+    /** @var T */
     public Level $level { get => $this->closedDeck->level; }
 
     public function __construct(
