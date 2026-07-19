@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Ekvedaras\SpaceSim;
 
 use Ekvedaras\SpaceSim\Deck\OpenDeck;
-use Ekvedaras\SpaceSim\Resources\Resource;
 use Ekvedaras\SpaceSim\Resources\Stack;
 use Ekvedaras\SpaceSim\Resources\StacksOfResources;
-use Ekvedaras\SpaceSim\Royals\Bonus;
+use Ekvedaras\SpaceSim\Bonuses\Bonus;
 use Webmozart\Assert\Assert;
 
 use function Laravel\Prompts\info;
@@ -20,12 +19,12 @@ final class Player
     private(set) array $cards = [];
 
     /** @var list<Bonus> */
-    private(set) array $royals = [];
+    private(set) array $bonuses = [];
 
     public int $points {
         get => array_sum([
                              ...array_map(fn(Card $card) => $card->points, $this->cards),
-                             ...array_map(fn(Bonus $royal) => $royal->points, $this->royals),
+                             ...array_map(fn(Bonus $bonus) => $bonus->points, $this->bonuses),
                          ]);
     }
 

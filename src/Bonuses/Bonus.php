@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ekvedaras\SpaceSim\Royals;
+namespace Ekvedaras\SpaceSim\Bonuses;
 
 use Ekvedaras\SpaceSim\Cost\Cost;
 

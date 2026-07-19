@@ -3,10 +3,13 @@
 
 declare(strict_types=1);
 
+use Ekvedaras\SpaceSim\Actions\Action;
 use Ekvedaras\SpaceSim\Deck\ClosedDeck;
 use Ekvedaras\SpaceSim\Game;
 use Ekvedaras\SpaceSim\Player;
 use NunoMaduro\Collision\Provider as CollisonProvider;
+
+use function Laravel\Prompts\select;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -22,22 +25,39 @@ $game = new Game(
     thirdLevelDeck: ClosedDeck::forThirdLevel()->shuffle(),
 );
 
-$game->print();
-echo "\n-----------------------------------------------\n";
+for (;;) {
+    $game->print();
+    echo "\n-----------------------------------------------\n";
 
-$player1
-    ->takeOneResource(from: $game->resourcesOnTheTable->redStack)
-    ->takeOneResource(from: $game->resourcesOnTheTable->greenStack)
-    ->takeOneResource(from: $game->resourcesOnTheTable->blueStack);
+    for (;;) {
+        $action = select('Action', $game->actions());
 
-$game->print();
-echo "\n-----------------------------------------------\n";
+        /** @var Action $action */
+        $action = new $action();
+        $input = $action->input($game);
+        if ($action->allowed($game, $game->currentPlayer, $input)) {
+            $action->perform($game, $game->currentPlayer, $input);
+            break;
+        }
 
-$player2->takeTwoResources(from: $game->resourcesOnTheTable->blackStack);
+        echo "Ah ah\n";
+    }
+}
 
-$game->print();
-echo "\n-----------------------------------------------\n";
 
-$player1->takeCard(1, from: $game->firstLevelOpenCards);
-
-$game->print();
+//$player1
+//    ->takeOneResource(from: $game->resourcesOnTheTable->redStack)
+//    ->takeOneResource(from: $game->resourcesOnTheTable->greenStack)
+//    ->takeOneResource(from: $game->resourcesOnTheTable->blueStack);
+//
+//$game->print();
+//echo "\n-----------------------------------------------\n";
+//
+//$player2->takeTwoResources(from: $game->resourcesOnTheTable->blackStack);
+//
+//$game->print();
+//echo "\n-----------------------------------------------\n";
+//
+//$player1->takeCard(1, from: $game->firstLevelOpenCards);
+//
+//$game->print();
